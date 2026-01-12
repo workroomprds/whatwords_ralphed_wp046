@@ -16,7 +16,7 @@ There are _many_ libraries that perform similar functions. But none of them are 
 
 (I even implemented it as Excel formulas. Though that one requires a bit of work to install.)
 
-But like said: the `whenwords` library _contains no code_. Instead, `whenwords` contains specs and tests, specifically:
+But like I said: the `whenwords` library _contains no code_. Instead, `whenwords` contains specs and tests, specifically:
 
 - **SPEC.md**: A detailed description of how the library should behave and how it should be implemented.
 - **tests.yaml**: A list of language-agnostic test cases, defined as input/output pairs, that any implementation must pass.
