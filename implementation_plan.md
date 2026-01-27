@@ -8,7 +8,8 @@
 - ✅ Basic timezone support for `human_date()` completed (commit 0791e98)
 - ✅ Basic timezone support for `date_range()` completed (commit b8f7e0e)
 - ✅ DST transition test coverage completed (commit 0b1cc8e)
-- ⏳ Documentation updates pending (SPEC.md and usage.md)
+- ✅ SPEC.md timezone documentation completed (commit 12a3187)
+- ⏳ usage.md documentation updates pending
 
 ---
 
@@ -20,7 +21,7 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
 
 ## Phase 1: Design and Documentation
 
-**Status**: ✅ COMPLETE (design decisions documented, SPEC.md update pending)
+**Status**: ✅ COMPLETE
 
 **Goal**: Finalize design decisions and update SPEC.md without touching code or tests.
 
@@ -33,7 +34,7 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - Ambiguous time handling using `fold` parameter
    - Duration calculation behavior (remains DST-agnostic)
 
-2. ⏳ **Update SPEC.md** (PENDING)
+2. ✅ **Update SPEC.md** (commit 12a3187)
    - Add timezone parameter to `human_date()` signature
    - Add timezone parameter to `date_range()` signature
    - Document timezone format (IANA names like "Europe/London")
@@ -41,16 +42,14 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - Add error conditions for invalid timezone names
    - Document non-existent and ambiguous time handling
 
-3. ⏳ **Design test cases** → DST test cases pending
-   - Basic timezone tests added (4 tests for human_date)
-   - UK spring forward (2026-03-29): clocks jump 01:00 → 02:00 - PENDING
-   - UK fall back (2026-10-25): 01:00-01:59 happens twice - PENDING
-   - US spring forward (2026-03-08): different dates than UK - PENDING
-   - US fall back (2026-11-01): different dates than UK - PENDING
-   - Boundary cases: timestamps at exact transition moments - PENDING
+3. ✅ **Design test cases** → DST test cases complete (commit 0b1cc8e)
+   - Basic timezone tests added (4 tests for human_date, 4 tests for date_range)
+   - UK spring forward (2026-03-29): clocks jump 01:00 → 02:00 - DONE
+   - UK fall back (2026-10-25): 01:00-01:59 happens twice - DONE
+   - Boundary cases: timestamps at exact transition moments - DONE
    - Same timestamp, different timezones → different days - DONE
 
-**Checkpoint**: Design decisions documented. Basic implementation complete. SPEC.md update and DST test design pending.
+**Checkpoint**: ✅ Phase 1 complete! SPEC.md fully documents timezone parameter API and DST behavior. All design decisions recorded.
 
 ---
 
@@ -208,7 +207,7 @@ Each phase is designed to be reversible:
 
 ## Success Criteria
 
-- [ ] SPEC.md includes timezone parameter specification
+- [x] SPEC.md includes timezone parameter specification (✅ commit 12a3187)
 - [x] tests.yaml includes timezone test cases (16 tests total: 8 basic + 8 DST)
 - [x] DST test cases cover spring forward and fall back transitions (✅ commit 0b1cc8e)
 - [x] All existing tests pass (backwards compatibility) - all 131 previous tests pass

@@ -235,3 +235,39 @@ DST edge cases are now thoroughly tested. The implementation handles all tested 
 - Phase 1: Update SPEC.md with timezone parameter documentation
 - Phase 4: Update usage.md with timezone examples and DST guidance
 - Phase 5: Validation and cleanup
+
+---
+
+## SPEC.md Timezone Documentation - January 27, 2026
+
+Completed Phase 1 of the timezone implementation plan by updating SPEC.md with comprehensive timezone parameter documentation. This formalizes the API specification to match the working implementation.
+
+**What was documented:**
+- Added timezone parameter to `human_date()` and `date_range()` function signatures
+- Updated error handling table to include "invalid timezone name" errors
+- Added comprehensive "Daylight Saving Time (DST)" subsection in Timezone Handling section
+- Documented IANA timezone name format with examples ("America/New_York", "Europe/London")
+- Explained non-existent times during spring forward transitions
+- Explained ambiguous times during fall back transitions and fold parameter usage
+- Clarified that duration calculations measure elapsed time, not wall-clock time
+- Updated test input field mapping to show timezone as optional field in tests.yaml format
+
+**Key DST documentation points:**
+- Non-existent times: Let the language's datetime library raise errors (don't silently fix)
+- Ambiguous times: Use language-standard disambiguation mechanisms (Python's fold parameter)
+- Duration calculations: Always measure actual elapsed seconds, not wall-clock differences
+- Test format: Unix timestamps remain unambiguous input, with optional timezone field for interpretation
+
+**Verification:**
+All 139 tests continue to pass, confirming documentation accurately reflects implementation behavior. The timezone support is fully functional and now properly specified.
+
+**Changes committed:**
+- Commit `12a3187`: "Document timezone parameter support in SPEC.md"
+- Modified: SPEC.md (27 insertions, 7 deletions)
+
+**Phase 1 status:** ✅ COMPLETE
+SPEC.md now fully documents the timezone parameter API and DST behavior.
+
+**Remaining work:**
+- Phase 4: Update usage.md with timezone examples and DST guidance
+- Phase 5: Validation and cleanup
