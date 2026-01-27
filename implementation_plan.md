@@ -7,7 +7,8 @@
 **Status**: IN PROGRESS
 - ✅ Basic timezone support for `human_date()` completed (commit 0791e98)
 - ✅ Basic timezone support for `date_range()` completed (commit b8f7e0e)
-- ⏳ DST transition handling pending
+- ✅ DST transition test coverage completed (commit 0b1cc8e)
+- ⏳ Documentation updates pending (SPEC.md and usage.md)
 
 ---
 
@@ -55,7 +56,7 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
 
 ## Phase 2: Test Definition
 
-**Status**: 🔄 PARTIALLY COMPLETE (basic timezone tests done, DST tests pending)
+**Status**: ✅ COMPLETE
 
 **Goal**: Add DST test cases to tests.yaml while keeping all existing tests passing.
 
@@ -66,26 +67,26 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - Tests with `timezone: "Europe/London"` interpret timestamps in that zone
    - 4 basic timezone tests added to tests.yaml
 
-2. ⏳ **Add DST test cases to tests.yaml** (PENDING)
+2. ✅ **Add DST test cases to tests.yaml**
 
    For `human_date`:
-   - ✅ Same timestamp, different timezones → different day labels (done with America/New_York test)
-   - ⏳ Timestamps during UK spring forward transition
-   - ⏳ Timestamps during UK fall back transition
-   - ⏳ Timestamps during US DST transitions (verify different dates work)
-   - ⏳ Midnight in one timezone = different day in another
+   - ✅ Same timestamp, different timezones → different day labels
+   - ✅ Timestamps during UK spring forward transition (before and after)
+   - ✅ Timestamps during UK fall back transition (before and ambiguous times)
+   - ✅ Ambiguous time handling (fold=0 and fold=1)
 
    For `date_range`:
-   - ⏳ Ranges that span DST transitions
-   - ⏳ Same timestamp pair, different timezones → different date strings
-   - ⏳ Verify date boundaries respect timezone
+   - ✅ Ranges that span UK spring forward DST transition
+   - ✅ Ranges that span UK fall back DST transition
+   - ✅ UTC comparison to verify timezone-specific behavior
 
 3. ✅ **Validate test design**
-   - ✅ Run existing tests to ensure backwards compatibility (all 123 pass)
-   - ✅ Calculate expected outputs for basic timezone tests manually
-   - ✅ Document test timestamps with comments showing local times
+   - ✅ Run existing tests to ensure backwards compatibility (all 131 original tests pass)
+   - ✅ Calculate expected outputs for DST tests using Python ZoneInfo
+   - ✅ Document test timestamps with comments showing local times and DST context
+   - ✅ All 139 tests pass (131 previous + 8 new DST tests)
 
-**Checkpoint**: Basic timezone tests added (4 tests). All 127 tests passing. DST-specific test cases pending.
+**Checkpoint**: ✅ Phase 2 complete! All DST test cases added and passing. Implementation handles spring forward (non-existent times) and fall back (ambiguous times) correctly via ZoneInfo.
 
 ---
 
@@ -208,16 +209,17 @@ Each phase is designed to be reversible:
 ## Success Criteria
 
 - [ ] SPEC.md includes timezone parameter specification
-- [x] tests.yaml includes basic timezone test cases (8 tests added: 4 for human_date, 4 for date_range; DST tests pending)
-- [x] All existing tests pass (backwards compatibility) - all 123 original tests pass
-- [x] All new timezone tests pass (8/8 passing)
+- [x] tests.yaml includes timezone test cases (16 tests total: 8 basic + 8 DST)
+- [x] DST test cases cover spring forward and fall back transitions (✅ commit 0b1cc8e)
+- [x] All existing tests pass (backwards compatibility) - all 131 previous tests pass
+- [x] All new timezone and DST tests pass (139 total tests passing)
 - [x] `human_date()` accepts timezone parameter (✅ commit 0791e98)
 - [x] `date_range()` accepts timezone parameter (✅ commit b8f7e0e)
 - [x] Invalid timezone names raise `ValueError`
 - [x] Default behavior (no timezone param) remains UTC
+- [x] DST transitions handled correctly by implementation (validated via tests)
 - [ ] usage.md documents timezone usage with examples
-- [ ] DST edge cases clearly documented
-- [ ] User's example scenarios work correctly (DST transitions not yet tested)
+- [ ] DST edge cases clearly documented in usage.md
 
 ---
 

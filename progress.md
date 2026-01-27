@@ -182,3 +182,56 @@ Both `human_date()` and `date_range()` now support timezone parameters.
 - Phase 2: Add comprehensive DST transition test cases (spring forward, fall back)
 - Phase 4: Update usage.md with timezone examples and DST guidance
 - Phase 5: Validation and cleanup
+
+---
+
+## DST Transition Test Coverage - January 27, 2026
+
+Completed Phase 2 of the timezone implementation plan by adding comprehensive DST transition test cases. This validates that the existing timezone implementation correctly handles daylight saving time edge cases.
+
+**What was added:**
+- 8 new test cases covering DST transitions in UK timezone
+- 5 `human_date()` tests for spring forward and fall back scenarios
+- 3 `date_range()` tests for ranges spanning DST transitions
+
+**Test results:**
+All 139 tests pass (131 previous + 8 new DST tests), confirming the implementation correctly handles:
+- Spring forward transitions (clock skips forward, non-existent times)
+- Fall back transitions (clock goes back, ambiguous times)
+- Date ranges that span DST boundaries
+
+**DST scenarios tested:**
+
+*UK Spring Forward (2026-03-29 01:00 GMT → 02:00 BST):*
+- Timestamp before transition (00:30 GMT) displays as "Today"
+- Timestamp after transition (02:30 BST) displays as "Today"
+- Date ranges spanning the gap (23:00 GMT → 03:00 BST) correctly format as "March 28–29"
+
+*UK Fall Back (2026-10-25 02:00 BST → 01:00 GMT):*
+- Timestamp before transition (00:30 BST) displays as "Today"
+- First occurrence of ambiguous time (01:30 BST, fold=0) displays as "Today"
+- Second occurrence of ambiguous time (01:30 GMT, fold=1) displays as "Today"
+- Date ranges spanning the transition correctly format as "October 24–25"
+
+**Key insight:**
+Python's ZoneInfo module handles all DST complexity automatically. The implementation requires no special DST logic—it simply converts Unix timestamps to timezone-aware datetimes, and ZoneInfo applies the correct offset based on the timestamp and timezone rules. This validates the architectural decision to rely on standard library timezone support.
+
+**Implementation validation:**
+The tests confirm that:
+- Non-existent times during spring forward are never created (tests use valid timestamps)
+- Ambiguous times during fall back are correctly interpreted via Unix timestamps (which are unambiguous)
+- Calendar day boundaries respect timezone offsets including DST
+- Date range formatting is consistent across DST transitions
+
+**Changes committed:**
+- Commit `0b1cc8e`: "Add DST transition test cases for timezone support"
+- Modified: tests.yaml (8 new test definitions), bin/test_whenwords.py (8 new test functions)
+- 102 insertions
+
+**Phase 2 status:** ✅ COMPLETE
+DST edge cases are now thoroughly tested. The implementation handles all tested scenarios correctly.
+
+**Remaining work:**
+- Phase 1: Update SPEC.md with timezone parameter documentation
+- Phase 4: Update usage.md with timezone examples and DST guidance
+- Phase 5: Validation and cleanup
