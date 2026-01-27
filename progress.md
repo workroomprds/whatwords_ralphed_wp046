@@ -132,3 +132,53 @@ Followed test-first workflow:
 - Phase 3: Add timezone support to date_range() function
 - Phase 4: Update usage.md with timezone examples and DST guidance
 - Update SPEC.md with timezone parameter documentation
+
+---
+
+## Timezone Support for date_range() - January 27, 2026
+
+Completed timezone support for `date_range()` function, finishing Phase 3 of the timezone implementation plan. Both calendar functions now support optional timezone parameters with consistent behavior.
+
+**What was implemented:**
+- Added `timezone` parameter to `date_range()` signature (optional, defaults to UTC)
+- Used same ZoneInfo integration pattern as `human_date()`
+- Error handling for invalid timezone names
+- Full backwards compatibility maintained
+- 4 new test cases proving timezone functionality
+
+**Test results:**
+All 131 tests pass (127 previous + 4 new):
+- UTC timezone test showing two-day range (baseline)
+- America/New_York (EDT = UTC-4) collapsing same two timestamps to single day
+- Europe/London (BST = UTC+1) collapsing to single day on different date
+- Backwards compatibility test confirming None defaults to UTC
+
+**Key demonstration:**
+Timestamps 1721950200 (2024-07-25 23:30 UTC) to 1721955600 (2024-07-26 01:00 UTC):
+- In UTC: "July 25–26, 2024" (spans two days)
+- In America/New_York: "July 25, 2024" (19:30–21:00, same day)
+- In Europe/London: "July 26, 2024" (00:30–02:00 BST, same day)
+
+This clearly shows how timezone context affects date range display—the same time interval can represent different calendar days depending on the observer's timezone.
+
+**Implementation approach:**
+Followed strict TDD workflow as specified:
+1. Added 4 timezone test cases to tests.yaml
+2. Manually added corresponding test functions to test_whenwords.py
+3. Ran tests and confirmed failures (timezone parameter didn't exist)
+4. Modified `date_range()` in whenwords.py following `human_date()` pattern
+5. Verified all 131 tests pass
+
+**Changes committed:**
+- Commit `b8f7e0e`: "Add timezone support to date_range() function"
+- Modified: bin/whenwords.py, bin/test_whenwords.py, tests.yaml
+- 59 insertions, 4 deletions
+
+**Phase 3 status:** ✅ COMPLETE
+Both `human_date()` and `date_range()` now support timezone parameters.
+
+**Remaining work:**
+- Phase 1: Update SPEC.md with timezone parameter documentation
+- Phase 2: Add comprehensive DST transition test cases (spring forward, fall back)
+- Phase 4: Update usage.md with timezone examples and DST guidance
+- Phase 5: Validation and cleanup

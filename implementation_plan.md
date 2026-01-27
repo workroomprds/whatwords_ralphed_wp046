@@ -6,8 +6,8 @@
 
 **Status**: IN PROGRESS
 - ✅ Basic timezone support for `human_date()` completed (commit 0791e98)
+- ✅ Basic timezone support for `date_range()` completed (commit b8f7e0e)
 - ⏳ DST transition handling pending
-- ⏳ `date_range()` timezone support pending
 
 ---
 
@@ -91,7 +91,7 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
 
 ## Phase 3: Implementation
 
-**Status**: 🔄 PARTIALLY COMPLETE (human_date done, date_range pending)
+**Status**: ✅ COMPLETE
 
 **Goal**: Modify Python implementation to support timezone parameter.
 
@@ -112,10 +112,12 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - ✅ Raise `ValueError` for invalid timezone names
    - ✅ Updated docstring with timezone parameter and example
 
-3. ⏳ **Modify `date_range()`** (PENDING)
-   - Add optional `timezone` parameter (default: None)
-   - Apply same timezone conversion logic as `human_date()`
-   - Ensure both start and end use same timezone
+3. ✅ **Modify `date_range()`**
+   - ✅ Add optional `timezone` parameter (default: None)
+   - ✅ Apply same timezone conversion logic as `human_date()`
+   - ✅ Ensure both start and end use same timezone
+   - ✅ Updated docstring with timezone parameter and example
+   - ✅ Added 4 timezone test cases demonstrating same timestamps → different date ranges
 
 4. ✅ **Update `_to_timestamp()` if needed**
    - Current implementation handles timezone-aware datetime objects
@@ -124,10 +126,11 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
 
 5. ✅ **Run test suite**
    - ✅ All 123 existing tests pass (backwards compatibility maintained)
-   - ✅ All 4 new timezone tests pass
-   - ✅ Commit created: 0791e98
+   - ✅ All 4 new human_date timezone tests pass (commit 0791e98)
+   - ✅ All 4 new date_range timezone tests pass (commit b8f7e0e)
+   - ✅ Total: 131 tests passing
 
-**Checkpoint**: human_date() implementation complete, all 127 tests passing. date_range() pending.
+**Checkpoint**: ✅ Phase 3 complete! Both `human_date()` and `date_range()` now support timezone parameters with full backwards compatibility.
 
 ---
 
@@ -205,10 +208,11 @@ Each phase is designed to be reversible:
 ## Success Criteria
 
 - [ ] SPEC.md includes timezone parameter specification
-- [x] tests.yaml includes basic timezone test cases (4 tests added, DST tests pending)
+- [x] tests.yaml includes basic timezone test cases (8 tests added: 4 for human_date, 4 for date_range; DST tests pending)
 - [x] All existing tests pass (backwards compatibility) - all 123 original tests pass
-- [x] All new timezone tests pass (4/4 passing)
-- [~] `human_date()` accepts timezone parameter (✅ done), `date_range()` pending
+- [x] All new timezone tests pass (8/8 passing)
+- [x] `human_date()` accepts timezone parameter (✅ commit 0791e98)
+- [x] `date_range()` accepts timezone parameter (✅ commit b8f7e0e)
 - [x] Invalid timezone names raise `ValueError`
 - [x] Default behavior (no timezone param) remains UTC
 - [ ] usage.md documents timezone usage with examples
