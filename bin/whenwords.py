@@ -8,8 +8,9 @@ All functions are pure - no side effects, no I/O, no system clock access.
 
 import re
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timezone as dt_timezone
 from typing import Union, Optional, Dict, Any
+from zoneinfo import ZoneInfo
 
 
 def _to_timestamp(value: Union[int, float, str, datetime]) -> float:
@@ -242,12 +243,15 @@ def parse_duration(duration_str: str) -> int:
 
 
 def human_date(timestamp: Union[int, float, str, datetime],
-               reference: Optional[Union[int, float, str, datetime]] = None) -> str:
+               reference: Optional[Union[int, float, str, datetime]] = None,
+               timezone: Optional[str] = None) -> str:
     """Return a contextual date string.
 
     Args:
         timestamp: The date to format
         reference: The reference date for comparison (defaults to timestamp)
+        timezone: IANA timezone name (e.g., "America/New_York", "Europe/London").
+                  If None, uses UTC (default).
 
     Returns:
         A string like "Today", "Yesterday", "Last Friday", or "March 5"
@@ -257,13 +261,24 @@ def human_date(timestamp: Union[int, float, str, datetime],
         'Today'
         >>> human_date(1705190400, 1705276800)
         'Yesterday'
+        >>> human_date(1721950200, 1721952000, timezone="America/New_York")
+        'Today'
     """
     ts = _to_timestamp(timestamp)
     ref = _to_timestamp(reference) if reference is not None else ts
 
-    # Convert to datetime objects in UTC
-    dt = datetime.fromtimestamp(ts, tz=timezone.utc)
-    ref_dt = datetime.fromtimestamp(ref, tz=timezone.utc)
+    # Determine timezone to use
+    if timezone is None:
+        tz = dt_timezone.utc
+    else:
+        try:
+            tz = ZoneInfo(timezone)
+        except Exception as e:
+            raise ValueError(f"Invalid timezone name: {timezone}") from e
+
+    # Convert to datetime objects in specified timezone
+    dt = datetime.fromtimestamp(ts, tz=tz)
+    ref_dt = datetime.fromtimestamp(ref, tz=tz)
 
     # Get date components (ignoring time)
     dt_date = dt.date()
@@ -327,8 +342,8 @@ def date_range(start: Union[int, float, str, datetime],
         start_ts, end_ts = end_ts, start_ts
 
     # Convert to datetime objects in UTC
-    start_dt = datetime.fromtimestamp(start_ts, tz=timezone.utc)
-    end_dt = datetime.fromtimestamp(end_ts, tz=timezone.utc)
+    start_dt = datetime.fromtimestamp(start_ts, tz=dt_timezone.utc)
+    end_dt = datetime.fromtimestamp(end_ts, tz=dt_timezone.utc)
 
     # Get date components
     start_date = start_dt.date()

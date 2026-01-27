@@ -590,6 +590,26 @@ def test_human_date_next_year():
     assert result == "January 6, 2025"
 
 
+def test_human_date_timezone_utc_yesterday():
+    result = human_date(1721950200, reference=1721952000, timezone="UTC")
+    assert result == "Yesterday"
+
+
+def test_human_date_timezone_america_new_york_same_day():
+    result = human_date(1721950200, reference=1721952000, timezone="America/New_York")
+    assert result == "Today"
+
+
+def test_human_date_timezone_europe_london_today_bst_is_utc_plus_1():
+    result = human_date(1721950200, reference=1721952000, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_no_timezone_defaults_to_utc():
+    result = human_date(1721950200, reference=1721952000)
+    assert result == "Yesterday"
+
+
 # =============================================================================
 # date_range tests
 # =============================================================================

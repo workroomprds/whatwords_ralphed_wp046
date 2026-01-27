@@ -469,6 +469,26 @@ human_date:
     input: { timestamp: 1736121600, reference: 1705276800 }
     output: "January 6, 2025"
 
+  # Timezone tests
+  # Reference: 1721952000 = 2024-07-26 00:00:00 UTC (Friday midnight)
+  # timestamp: 1721950200 = 2024-07-25 23:30:00 UTC (Thursday 11:30 PM)
+
+  - name: "timezone UTC - yesterday"
+    input: { timestamp: 1721950200, reference: 1721952000, timezone: "UTC" }
+    output: "Yesterday"
+
+  - name: "timezone America/New_York - same day"
+    input: { timestamp: 1721950200, reference: 1721952000, timezone: "America/New_York" }
+    output: "Today"
+
+  - name: "timezone Europe/London - today (BST is UTC+1)"
+    input: { timestamp: 1721950200, reference: 1721952000, timezone: "Europe/London" }
+    output: "Today"
+
+  - name: "no timezone defaults to UTC"
+    input: { timestamp: 1721950200, reference: 1721952000 }
+    output: "Yesterday"
+
 
 date_range:
   # Using 2024 dates
