@@ -489,6 +489,43 @@ human_date:
     input: { timestamp: 1721950200, reference: 1721952000 }
     output: "Yesterday"
 
+  # DST transition tests - UK spring forward 2026-03-29 01:00 GMT → 02:00 BST
+  # timestamp: 1774744200 = 2026-03-29 00:30:00 GMT (before spring forward)
+  # reference: 1774782000 = 2026-03-29 12:00:00 BST (same day, after transition)
+
+  - name: "DST spring forward - before transition"
+    input: { timestamp: 1774744200, reference: 1774782000, timezone: "Europe/London" }
+    output: "Today"
+
+  # timestamp: 1774747800 = 2026-03-29 02:30:00 BST (after spring forward, 01:30 UTC)
+  # reference: 1774782000 = 2026-03-29 12:00:00 BST (same day)
+
+  - name: "DST spring forward - after transition"
+    input: { timestamp: 1774747800, reference: 1774782000, timezone: "Europe/London" }
+    output: "Today"
+
+  # DST transition tests - UK fall back 2026-10-25 02:00 BST → 01:00 GMT
+  # timestamp: 1792884600 = 2026-10-25 00:30:00 BST (before fall back)
+  # reference: 1792929600 = 2026-10-25 12:00:00 GMT (same day, after transition)
+
+  - name: "DST fall back - before transition"
+    input: { timestamp: 1792884600, reference: 1792929600, timezone: "Europe/London" }
+    output: "Today"
+
+  # timestamp: 1792888200 = 2026-10-25 01:30:00 BST (first occurrence, before fall back)
+  # reference: 1792929600 = 2026-10-25 12:00:00 GMT (same day)
+
+  - name: "DST fall back - ambiguous time first occurrence"
+    input: { timestamp: 1792888200, reference: 1792929600, timezone: "Europe/London" }
+    output: "Today"
+
+  # timestamp: 1792891800 = 2026-10-25 01:30:00 GMT (second occurrence, after fall back)
+  # reference: 1792929600 = 2026-10-25 12:00:00 GMT (same day)
+
+  - name: "DST fall back - ambiguous time second occurrence"
+    input: { timestamp: 1792891800, reference: 1792929600, timezone: "Europe/London" }
+    output: "Today"
+
 
 date_range:
   # Using 2024 dates
@@ -549,3 +586,28 @@ date_range:
   - name: "no timezone defaults to UTC"
     input: { start: 1721950200, end: 1721955600 }
     output: "July 25–26, 2024"
+
+  # DST transition tests - ranges spanning clock changes
+  # UK spring forward: 2026-03-29 01:00 GMT → 02:00 BST (clocks skip forward)
+  # start: 1774738800 = 2026-03-28 23:00:00 GMT (Saturday night)
+  # end:   1774749600 = 2026-03-29 03:00:00 BST (Sunday early morning, 02:00 UTC)
+
+  - name: "DST spring forward - range spans transition"
+    input: { start: 1774738800, end: 1774749600, timezone: "Europe/London" }
+    output: "March 28–29, 2026"
+
+  # UK fall back: 2026-10-25 02:00 BST → 01:00 GMT (clocks go back)
+  # start: 1792879200 = 2026-10-24 23:00:00 BST (Saturday night, 22:00 UTC)
+  # end:   1792897200 = 2026-10-25 03:00:00 GMT (Sunday early morning)
+
+  - name: "DST fall back - range spans transition"
+    input: { start: 1792879200, end: 1792897200, timezone: "Europe/London" }
+    output: "October 24–25, 2026"
+
+  # Same timestamps in UTC should show different dates due to DST
+  # Without timezone (UTC): spans March 28-29
+  # With Europe/London: spans March 28-29 (but different hours due to DST)
+
+  - name: "DST spring forward - UTC comparison"
+    input: { start: 1774738800, end: 1774749600 }
+    output: "March 28–29, 2026"

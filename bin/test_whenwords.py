@@ -610,6 +610,31 @@ def test_human_date_no_timezone_defaults_to_utc():
     assert result == "Yesterday"
 
 
+def test_human_date_dst_spring_forward_before_transition():
+    result = human_date(1774744200, reference=1774782000, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_dst_spring_forward_after_transition():
+    result = human_date(1774747800, reference=1774782000, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_dst_fall_back_before_transition():
+    result = human_date(1792884600, reference=1792929600, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_dst_fall_back_ambiguous_time_first_occurrence():
+    result = human_date(1792888200, reference=1792929600, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_dst_fall_back_ambiguous_time_second_occurrence():
+    result = human_date(1792891800, reference=1792929600, timezone="Europe/London")
+    assert result == "Today"
+
+
 # =============================================================================
 # date_range tests
 # =============================================================================
@@ -677,3 +702,18 @@ def test_date_range_timezone_europe_london_same_day_bst_is_utc_plus_1():
 def test_date_range_no_timezone_defaults_to_utc():
     result = date_range(1721950200, 1721955600)
     assert result == "July 25–26, 2024"
+
+
+def test_date_range_dst_spring_forward_range_spans_transition():
+    result = date_range(1774738800, 1774749600, timezone="Europe/London")
+    assert result == "March 28–29, 2026"
+
+
+def test_date_range_dst_fall_back_range_spans_transition():
+    result = date_range(1792879200, 1792897200, timezone="Europe/London")
+    assert result == "October 24–25, 2026"
+
+
+def test_date_range_dst_spring_forward_utc_comparison():
+    result = date_range(1774738800, 1774749600)
+    assert result == "March 28–29, 2026"
