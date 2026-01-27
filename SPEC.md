@@ -83,8 +83,8 @@ Errors should be reported idiomatically for the target language:
 | `timeago` | Invalid timestamp format |
 | `duration` | Negative seconds, NaN, infinite |
 | `parse_duration` | Empty string, unparseable input, negative result |
-| `human_date` | Invalid timestamp format |
-| `date_range` | Invalid timestamp format |
+| `human_date` | Invalid timestamp format, invalid timezone name |
+| `date_range` | Invalid timestamp format, invalid timezone name |
 
 When in doubt, be liberal in inputs (accept reasonable variations) and strict in outputs (always return spec-compliant strings).
 
@@ -99,9 +99,25 @@ When in doubt, be liberal in inputs (accept reasonable variations) and strict in
 - The output depends on which calendar day that instant falls on
 - By default, interpret timestamps in **UTC**
 - Implementations MAY add an optional `timezone` parameter
-- If timezone support is added, use IANA timezone names (`America/New_York`)
+- If timezone support is added, use IANA timezone names (`America/New_York`, `Europe/London`)
 
 The spec tests assume UTC. Timezone-aware implementations must still pass all spec tests when using UTC.
+
+### Daylight Saving Time (DST)
+
+When timezone support is implemented, DST transitions are handled automatically by the timezone database:
+
+**Non-existent times (spring forward)**: When clocks jump forward (e.g., 01:00 → 02:00), times in the skipped hour don't exist. Implementations should let the language's datetime library raise an error if a user attempts to create a non-existent time. Do not attempt to silently "fix" non-existent times.
+
+**Ambiguous times (fall back)**: When clocks fall back (e.g., 02:00 → 01:00), times in the repeated hour are ambiguous. Implementations should use the language's standard mechanism for disambiguation (e.g., Python's `fold` parameter, Java's `ZoneId` resolution strategy).
+
+**Duration calculations**: The `duration()` function measures elapsed time, not wall-clock time. The elapsed time across a DST transition is based on actual seconds passed, not the difference in displayed clock time. For example:
+- UK 2026-03-29 00:30 to 02:30 spans spring forward
+- Wall clock shows 2-hour difference
+- Only 3600 seconds (1 hour) actually elapsed
+- `duration(3600)` correctly returns "1 hour"
+
+**Test format**: DST test cases in `tests.yaml` may include an optional `timezone` field. Unix timestamps remain the input format (unambiguous across timezones).
 
 ---
 
@@ -223,13 +239,14 @@ Parses a human-written duration string into seconds.
 
 ---
 
-### human_date(timestamp, reference?) → string
+### human_date(timestamp, reference?, timezone?) → string
 
 Returns a contextual date string.
 
 **Arguments:**
 - `timestamp`: The date to format
 - `reference`: The "current" date for comparison
+- `timezone`: Optional. IANA timezone name (e.g., "Europe/London"). Defaults to UTC.
 
 **Behavior:**
 
@@ -245,13 +262,14 @@ Returns a contextual date string.
 
 ---
 
-### date_range(start, end) → string
+### date_range(start, end, timezone?) → string
 
 Formats a date range with smart abbreviation.
 
 **Arguments:**
 - `start`: Start timestamp
 - `end`: End timestamp
+- `timezone`: Optional. IANA timezone name (e.g., "America/New_York"). Defaults to UTC.
 
 **Behavior:**
 - Same day: "March 5, 2024"
@@ -312,13 +330,15 @@ input: "<string>"  # Direct string input, not an object
 
 **human_date:**
 ```yaml
-input: { timestamp: <number>, reference: <number> }
+input: { timestamp: <number>, reference: <number>, timezone?: <string> }
 ```
 
 **date_range:**
 ```yaml
-input: { start: <number>, end: <number> }
+input: { start: <number>, end: <number>, timezone?: <string> }
 ```
+
+The `timezone` field is optional. When omitted, tests assume UTC. When present, use an IANA timezone name.
 
 ### Test generation example
 
