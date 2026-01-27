@@ -657,3 +657,23 @@ def test_date_range_swapped_inputs_should_auto_correct():
 def test_date_range_multi_year_span():
     result = date_range(1672531200, 1735689600)
     assert result == "January 1, 2023 – January 1, 2025"
+
+
+def test_date_range_timezone_utc_spans_two_days():
+    result = date_range(1721950200, 1721955600, timezone="UTC")
+    assert result == "July 25–26, 2024"
+
+
+def test_date_range_timezone_america_new_york_same_day_edt_is_utc_minus_4():
+    result = date_range(1721950200, 1721955600, timezone="America/New_York")
+    assert result == "July 25, 2024"
+
+
+def test_date_range_timezone_europe_london_same_day_bst_is_utc_plus_1():
+    result = date_range(1721950200, 1721955600, timezone="Europe/London")
+    assert result == "July 26, 2024"
+
+
+def test_date_range_no_timezone_defaults_to_utc():
+    result = date_range(1721950200, 1721955600)
+    assert result == "July 25–26, 2024"

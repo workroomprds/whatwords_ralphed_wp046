@@ -528,3 +528,24 @@ date_range:
   - name: "multi-year span"
     input: { start: 1672531200, end: 1735689600 }
     output: "January 1, 2023 – January 1, 2025"
+
+  # Timezone tests
+  # Testing same timestamps in different timezones produce different date strings
+  # Reference: 1721950200 = 2024-07-25 23:30:00 UTC (Thursday night)
+  #            1721955600 = 2024-07-26 01:00:00 UTC (Friday early morning)
+
+  - name: "timezone UTC - spans two days"
+    input: { start: 1721950200, end: 1721955600, timezone: "UTC" }
+    output: "July 25–26, 2024"
+
+  - name: "timezone America/New_York - same day (EDT is UTC-4)"
+    input: { start: 1721950200, end: 1721955600, timezone: "America/New_York" }
+    output: "July 25, 2024"
+
+  - name: "timezone Europe/London - same day (BST is UTC+1)"
+    input: { start: 1721950200, end: 1721955600, timezone: "Europe/London" }
+    output: "July 26, 2024"
+
+  - name: "no timezone defaults to UTC"
+    input: { start: 1721950200, end: 1721955600 }
+    output: "July 25–26, 2024"
