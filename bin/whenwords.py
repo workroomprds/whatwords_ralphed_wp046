@@ -318,12 +318,15 @@ def human_date(timestamp: Union[int, float, str, datetime],
 
 
 def date_range(start: Union[int, float, str, datetime],
-               end: Union[int, float, str, datetime]) -> str:
+               end: Union[int, float, str, datetime],
+               timezone: Optional[str] = None) -> str:
     """Format a date range with smart abbreviation.
 
     Args:
         start: Start timestamp
         end: End timestamp
+        timezone: IANA timezone name (e.g., "America/New_York", "Europe/London").
+                  If None, uses UTC (default).
 
     Returns:
         A formatted date range string
@@ -333,6 +336,8 @@ def date_range(start: Union[int, float, str, datetime],
         'January 15, 2024'
         >>> date_range(1705276800, 1705881600)
         'January 15–22, 2024'
+        >>> date_range(1721865600, 1721952000, timezone="America/New_York")
+        'July 24–25, 2024'
     """
     start_ts = _to_timestamp(start)
     end_ts = _to_timestamp(end)
@@ -341,9 +346,18 @@ def date_range(start: Union[int, float, str, datetime],
     if start_ts > end_ts:
         start_ts, end_ts = end_ts, start_ts
 
-    # Convert to datetime objects in UTC
-    start_dt = datetime.fromtimestamp(start_ts, tz=dt_timezone.utc)
-    end_dt = datetime.fromtimestamp(end_ts, tz=dt_timezone.utc)
+    # Determine timezone to use
+    if timezone is None:
+        tz = dt_timezone.utc
+    else:
+        try:
+            tz = ZoneInfo(timezone)
+        except Exception as e:
+            raise ValueError(f"Invalid timezone name: {timezone}") from e
+
+    # Convert to datetime objects in specified timezone
+    start_dt = datetime.fromtimestamp(start_ts, tz=tz)
+    end_dt = datetime.fromtimestamp(end_ts, tz=tz)
 
     # Get date components
     start_date = start_dt.date()

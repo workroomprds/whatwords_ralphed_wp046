@@ -528,3 +528,24 @@ date_range:
   - name: "multi-year span"
     input: { start: 1672531200, end: 1735689600 }
     output: "January 1, 2023 – January 1, 2025"
+
+  # Timezone tests
+  - name: "timezone UTC explicit"
+    input: { start: 1721865600, end: 1721952000, timezone: "UTC" }
+    output: "July 25–26, 2024"
+
+  - name: "timezone America/New_York shows different dates"
+    # start: 1721865600 = 2024-07-25 00:00:00 UTC = 2024-07-24 20:00:00 EDT
+    # end: 1721952000 = 2024-07-26 00:00:00 UTC = 2024-07-25 20:00:00 EDT
+    input: { start: 1721865600, end: 1721952000, timezone: "America/New_York" }
+    output: "July 24–25, 2024"
+
+  - name: "timezone Europe/London"
+    # start: 1721865600 = 2024-07-25 00:00:00 UTC = 2024-07-25 01:00:00 BST
+    # end: 1721952000 = 2024-07-26 00:00:00 UTC = 2024-07-26 01:00:00 BST
+    input: { start: 1721865600, end: 1721952000, timezone: "Europe/London" }
+    output: "July 25–26, 2024"
+
+  - name: "no timezone parameter defaults to UTC"
+    input: { start: 1721865600, end: 1721952000 }
+    output: "July 25–26, 2024"
