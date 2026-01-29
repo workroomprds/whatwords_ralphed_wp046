@@ -3,11 +3,13 @@
 **Goal**: Add timezone support to whenwords calendar functions to handle DST transitions correctly while maintaining backwards compatibility.
 
 **Date**: 2026-01-27
+**Last Updated**: 2026-01-29
 
 **Status**: IN PROGRESS
 - ✅ Basic timezone support for `human_date()` completed (commit 0791e98)
-- ⏳ DST transition handling pending
-- ⏳ `date_range()` timezone support pending
+- ✅ Basic timezone support for `date_range()` completed (commit 24970cd)
+- ✅ DST transition test cases completed (commit 9b62c6d)
+- ⏳ Documentation updates pending
 
 ---
 
@@ -55,7 +57,7 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
 
 ## Phase 2: Test Definition
 
-**Status**: 🔄 PARTIALLY COMPLETE (basic timezone tests done, DST tests pending)
+**Status**: ✅ COMPLETE (all timezone and DST tests implemented)
 
 **Goal**: Add DST test cases to tests.yaml while keeping all existing tests passing.
 
@@ -66,32 +68,34 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - Tests with `timezone: "Europe/London"` interpret timestamps in that zone
    - 4 basic timezone tests added to tests.yaml
 
-2. ⏳ **Add DST test cases to tests.yaml** (PENDING)
+2. ✅ **Add DST test cases to tests.yaml**
 
    For `human_date`:
    - ✅ Same timestamp, different timezones → different day labels (done with America/New_York test)
-   - ⏳ Timestamps during UK spring forward transition
-   - ⏳ Timestamps during UK fall back transition
-   - ⏳ Timestamps during US DST transitions (verify different dates work)
-   - ⏳ Midnight in one timezone = different day in another
+   - ✅ Timestamps during UK spring forward transition (2 tests: before/after)
+   - ✅ Timestamps during UK fall back transition (2 tests: before/after)
+   - ✅ Timestamps during US DST transitions (2 tests: before/after spring forward)
+   - ✅ Total: 6 DST tests for human_date
 
    For `date_range`:
-   - ⏳ Ranges that span DST transitions
-   - ⏳ Same timestamp pair, different timezones → different date strings
-   - ⏳ Verify date boundaries respect timezone
+   - ✅ Ranges that span UK spring forward DST transition
+   - ✅ Ranges that span UK fall back DST transition
+   - ✅ Same timestamp pair, different timezones showing DST effect
+   - ✅ Total: 3 DST tests for date_range
 
 3. ✅ **Validate test design**
    - ✅ Run existing tests to ensure backwards compatibility (all 123 pass)
-   - ✅ Calculate expected outputs for basic timezone tests manually
-   - ✅ Document test timestamps with comments showing local times
+   - ✅ Calculate expected outputs for DST tests manually using Python timestamps
+   - ✅ Document test timestamps with detailed comments showing local times
+   - ✅ All 140 tests pass (131 previous + 9 new DST tests)
 
-**Checkpoint**: Basic timezone tests added (4 tests). All 127 tests passing. DST-specific test cases pending.
+**Checkpoint**: All timezone and DST test cases complete. Total: 140 tests passing. No code changes needed - zoneinfo handles DST automatically.
 
 ---
 
 ## Phase 3: Implementation
 
-**Status**: 🔄 PARTIALLY COMPLETE (human_date done, date_range pending)
+**Status**: ✅ COMPLETE (both calendar functions have timezone support)
 
 **Goal**: Modify Python implementation to support timezone parameter.
 
@@ -112,10 +116,13 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - ✅ Raise `ValueError` for invalid timezone names
    - ✅ Updated docstring with timezone parameter and example
 
-3. ⏳ **Modify `date_range()`** (PENDING)
-   - Add optional `timezone` parameter (default: None)
-   - Apply same timezone conversion logic as `human_date()`
-   - Ensure both start and end use same timezone
+3. ✅ **Modify `date_range()`**
+   - ✅ Add optional `timezone` parameter (default: None)
+   - ✅ Apply same timezone conversion logic as `human_date()`
+   - ✅ Ensure both start and end use same timezone
+   - ✅ Added 4 timezone test cases to tests.yaml
+   - ✅ Updated docstring with timezone parameter and example
+   - ✅ Commit created: 24970cd
 
 4. ✅ **Update `_to_timestamp()` if needed**
    - Current implementation handles timezone-aware datetime objects
@@ -123,11 +130,12 @@ Currently, whenwords uses UTC for all calendar operations, which sidesteps DST e
    - No changes needed (datetime.timestamp() already handles this)
 
 5. ✅ **Run test suite**
-   - ✅ All 123 existing tests pass (backwards compatibility maintained)
-   - ✅ All 4 new timezone tests pass
-   - ✅ Commit created: 0791e98
+   - ✅ All 123 original tests pass (backwards compatibility maintained)
+   - ✅ All 4 human_date timezone tests pass (commit 0791e98)
+   - ✅ All 4 date_range timezone tests pass (commit 24970cd)
+   - ✅ Total: 131 tests passing
 
-**Checkpoint**: human_date() implementation complete, all 127 tests passing. date_range() pending.
+**Checkpoint**: Basic timezone support complete for both `human_date()` and `date_range()`. All 131 tests passing. DST-specific test cases and documentation still pending.
 
 ---
 
@@ -205,15 +213,16 @@ Each phase is designed to be reversible:
 ## Success Criteria
 
 - [ ] SPEC.md includes timezone parameter specification
-- [x] tests.yaml includes basic timezone test cases (4 tests added, DST tests pending)
+- [x] tests.yaml includes comprehensive timezone test cases (17 total: 8 basic + 9 DST; commit 9b62c6d)
 - [x] All existing tests pass (backwards compatibility) - all 123 original tests pass
-- [x] All new timezone tests pass (4/4 passing)
-- [~] `human_date()` accepts timezone parameter (✅ done), `date_range()` pending
+- [x] All new timezone and DST tests pass (17/17 passing, 140 total tests)
+- [x] `human_date()` accepts timezone parameter (commit 0791e98)
+- [x] `date_range()` accepts timezone parameter (commit 24970cd)
 - [x] Invalid timezone names raise `ValueError`
 - [x] Default behavior (no timezone param) remains UTC
+- [x] DST transitions tested (UK spring/fall, US spring; all handled correctly by zoneinfo)
 - [ ] usage.md documents timezone usage with examples
 - [ ] DST edge cases clearly documented
-- [ ] User's example scenarios work correctly (DST transitions not yet tested)
 
 ---
 

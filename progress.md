@@ -132,3 +132,113 @@ Followed test-first workflow:
 - Phase 3: Add timezone support to date_range() function
 - Phase 4: Update usage.md with timezone examples and DST guidance
 - Update SPEC.md with timezone parameter documentation
+
+---
+
+## Timezone Support for date_range() - January 29, 2026
+
+Completed timezone support for `date_range()` function, enabling date ranges to be displayed in any IANA timezone. This completes the basic timezone functionality for both calendar functions in the library.
+
+**What was implemented:**
+- Added optional `timezone` parameter to `date_range()` signature (defaults to UTC)
+- Applied same timezone handling pattern as `human_date()` using ZoneInfo
+- Error handling for invalid timezone names (raises ValueError)
+- 4 new test cases demonstrating timezone behavior with date ranges
+
+**Test results:**
+All 131 tests pass (127 previous + 4 new date_range timezone tests):
+- UTC timezone explicit test (baseline)
+- America/New_York showing different dates than UTC for same timestamp range
+- Europe/London (BST) test verifying UTC+1 offset preserves same dates
+- Backwards compatibility test confirming None defaults to UTC
+
+**Key insight:**
+The same timestamp range can produce different date strings in different timezones. For example, timestamps from July 25 00:00 UTC to July 26 00:00 UTC display as "July 25–26, 2024" in UTC, but "July 24–25, 2024" in America/New_York (EDT, UTC-4), because midnight UTC is 8pm the previous day in New York.
+
+**Implementation approach:**
+Followed test-driven development:
+1. Added 4 timezone test cases to tests.yaml with detailed comments explaining timestamps
+2. Generated corresponding test functions in test_whenwords.py
+3. Ran tests and confirmed 4 failures (timezone parameter didn't exist)
+4. Modified whenwords.py to add timezone parameter and ZoneInfo logic
+5. Verified all 131 tests pass
+
+**Changes committed:**
+- Commit `24970cd`: "Add timezone support to date_range() function"
+- Modified: bin/whenwords.py, bin/test_whenwords.py, tests.yaml
+- 55 insertions, 4 deletions
+
+**Design consistency:**
+The implementation mirrors `human_date()` timezone support exactly:
+- Same parameter name and type (`timezone: Optional[str] = None`)
+- Same timezone validation and error handling
+- Same use of ZoneInfo for IANA timezone database
+- Same backwards compatibility (None defaults to UTC)
+
+This consistency makes the API predictable and easy to learn.
+
+**Remaining work:**
+- Phase 2: Add DST transition test cases (spring forward, fall back scenarios)
+- Phase 4: Update usage.md with timezone examples and DST guidance
+- Update SPEC.md with timezone parameter documentation for both functions
+
+---
+
+## DST Transition Test Cases - January 29, 2026
+
+Completed comprehensive DST transition testing, verifying that timezone support correctly handles daylight saving time changes in multiple timezones.
+
+**What was implemented:**
+- 6 DST test cases for `human_date()` covering spring forward and fall back scenarios
+- 3 DST test cases for `date_range()` covering ranges that span DST transitions
+- Tests for both UK DST (March 29, October 25) and US DST (March 8) transitions
+- Total test count increased from 131 to 140 tests
+
+**Test coverage:**
+UK Spring Forward (2026-03-29):
+- Timestamps before transition (00:30 GMT, still in GMT)
+- Timestamps after transition (02:30 BST, which is 01:30 GMT)
+
+UK Fall Back (2026-10-25):
+- Timestamps before transition (01:30 BST, which is 00:30 GMT)
+- Timestamps after transition (01:30 GMT, during the "repeated hour")
+
+US Eastern Time (2026-03-08):
+- Different DST transition date than UK, verifying timezone independence
+- Tests confirm same implementation works for all IANA timezones
+
+Date ranges spanning DST:
+- Ranges crossing UK spring forward transition
+- Ranges crossing UK fall back transition
+- Same timestamp range interpreted in different timezones
+
+**Key finding:**
+No code changes were required. Python's `zoneinfo` module automatically handles all DST transitions correctly, including:
+- Offset changes (GMT ↔ BST, EST ↔ EDT)
+- Non-existent times during spring forward
+- Ambiguous times during fall back
+
+All 140 tests pass without modification to the implementation.
+
+**Test methodology:**
+Followed test-first approach per project guidelines:
+1. Added 9 new test cases to tests.yaml with detailed timestamp calculations
+2. Generated corresponding test functions in test_whenwords.py
+3. Ran tests and verified all pass (existing implementation already correct)
+4. Committed changes
+
+**Changes committed:**
+- Commit `9b62c6d`: "Add DST transition test cases for timezone support"
+- Modified: tests.yaml, bin/test_whenwords.py
+- 112 insertions (67 in tests.yaml, 45 in test_whenwords.py)
+
+**Design validation:**
+These tests confirm that the decision to use Python's standard library `zoneinfo` was correct. By delegating DST complexity to the standard library rather than implementing custom logic, the code:
+- Handles all IANA timezone rules automatically
+- Stays up-to-date with timezone database changes
+- Works correctly with historical and future DST transitions
+- Requires no special-case code for DST
+
+**Remaining work:**
+- Phase 4: Update usage.md with timezone examples and DST guidance
+- Update SPEC.md with timezone parameter documentation for both functions
