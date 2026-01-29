@@ -610,6 +610,36 @@ def test_human_date_no_timezone_defaults_to_utc():
     assert result == "Yesterday"
 
 
+def test_human_date_uk_spring_forward_before_transition():
+    result = human_date(1774744200, reference=1774782000, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_uk_spring_forward_after_transition():
+    result = human_date(1774747800, reference=1774782000, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_uk_fall_back_before_transition():
+    result = human_date(1792888200, reference=1792929600, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_uk_fall_back_after_transition():
+    result = human_date(1792891800, reference=1792929600, timezone="Europe/London")
+    assert result == "Today"
+
+
+def test_human_date_us_spring_forward_before_transition():
+    result = human_date(1772951400, reference=1772985600, timezone="America/New_York")
+    assert result == "Today"
+
+
+def test_human_date_us_spring_forward_after_transition():
+    result = human_date(1772955000, reference=1772985600, timezone="America/New_York")
+    assert result == "Today"
+
+
 # =============================================================================
 # date_range tests
 # =============================================================================
@@ -673,3 +703,18 @@ def test_date_range_timezone_Europe_London():
 def test_date_range_no_timezone_parameter_defaults_to_UTC():
     result = date_range(1721865600, 1721952000)
     assert result == "July 25–26, 2024"
+
+
+def test_date_range_range_spanning_uk_spring_forward_dst():
+    result = date_range(1774699200, 1774872000, timezone="Europe/London")
+    assert result == "March 28–30, 2026"
+
+
+def test_date_range_range_spanning_uk_fall_back_dst():
+    result = date_range(1792843200, 1793016000, timezone="Europe/London")
+    assert result == "October 24–26, 2026"
+
+
+def test_date_range_same_range_different_timezone_shows_dst_effect():
+    result = date_range(1774699200, 1774872000, timezone="America/New_York")
+    assert result == "March 28–30, 2026"

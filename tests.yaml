@@ -489,6 +489,49 @@ human_date:
     input: { timestamp: 1721950200, reference: 1721952000 }
     output: "Yesterday"
 
+  # DST transition tests
+  # UK Spring Forward: 2026-03-29 at 01:00 GMT -> 02:00 BST (clocks jump forward)
+
+  - name: "UK spring forward - before transition"
+    # timestamp: 1774744200 = 2026-03-29 00:30:00 GMT = 2026-03-29 00:30:00 GMT (before DST)
+    # reference: 1774782000 = 2026-03-29 11:00:00 GMT = 2026-03-29 12:00:00 BST (after DST)
+    input: { timestamp: 1774744200, reference: 1774782000, timezone: "Europe/London" }
+    output: "Today"
+
+  - name: "UK spring forward - after transition"
+    # timestamp: 1774747800 = 2026-03-29 01:30:00 GMT = 2026-03-29 02:30:00 BST (after DST)
+    # reference: 1774782000 = 2026-03-29 11:00:00 GMT = 2026-03-29 12:00:00 BST
+    input: { timestamp: 1774747800, reference: 1774782000, timezone: "Europe/London" }
+    output: "Today"
+
+  # UK Fall Back: 2026-10-25 at 02:00 BST -> 01:00 GMT (clocks go back, 01:00-01:59 happens twice)
+
+  - name: "UK fall back - before transition"
+    # timestamp: 1792888200 = 2026-10-25 00:30:00 GMT = 2026-10-25 01:30:00 BST (before fall back)
+    # reference: 1792929600 = 2026-10-25 12:00:00 GMT = 2026-10-25 12:00:00 GMT (after fall back)
+    input: { timestamp: 1792888200, reference: 1792929600, timezone: "Europe/London" }
+    output: "Today"
+
+  - name: "UK fall back - after transition"
+    # timestamp: 1792891800 = 2026-10-25 01:30:00 GMT = 2026-10-25 01:30:00 GMT (after fall back)
+    # reference: 1792929600 = 2026-10-25 12:00:00 GMT
+    input: { timestamp: 1792891800, reference: 1792929600, timezone: "Europe/London" }
+    output: "Today"
+
+  # US Spring Forward: 2026-03-08 at 02:00 EST -> 03:00 EDT (different date than UK)
+
+  - name: "US spring forward - before transition"
+    # timestamp: 1772951400 = 2026-03-08 06:30:00 GMT = 2026-03-08 01:30:00 EST (before DST)
+    # reference: 1772985600 = 2026-03-08 16:00:00 GMT = 2026-03-08 12:00:00 EDT (after DST)
+    input: { timestamp: 1772951400, reference: 1772985600, timezone: "America/New_York" }
+    output: "Today"
+
+  - name: "US spring forward - after transition"
+    # timestamp: 1772955000 = 2026-03-08 07:30:00 GMT = 2026-03-08 03:30:00 EDT (after DST)
+    # reference: 1772985600 = 2026-03-08 16:00:00 GMT = 2026-03-08 12:00:00 EDT
+    input: { timestamp: 1772955000, reference: 1772985600, timezone: "America/New_York" }
+    output: "Today"
+
 
 date_range:
   # Using 2024 dates
@@ -549,3 +592,27 @@ date_range:
   - name: "no timezone parameter defaults to UTC"
     input: { start: 1721865600, end: 1721952000 }
     output: "July 25–26, 2024"
+
+  # DST transition tests
+  # Range spanning UK spring forward DST transition (2026-03-29)
+
+  - name: "range spanning UK spring forward DST"
+    # start: 1774699200 = 2026-03-28 12:00:00 GMT = 2026-03-28 12:00:00 GMT (before DST)
+    # end: 1774872000 = 2026-03-30 12:00:00 GMT = 2026-03-30 13:00:00 BST (after DST)
+    # Range crosses the point where clocks jump forward at 01:00 GMT -> 02:00 BST
+    input: { start: 1774699200, end: 1774872000, timezone: "Europe/London" }
+    output: "March 28–30, 2026"
+
+  - name: "range spanning UK fall back DST"
+    # start: 1792843200 = 2026-10-24 12:00:00 GMT = 2026-10-24 13:00:00 BST (before fall back)
+    # end: 1793016000 = 2026-10-26 12:00:00 GMT = 2026-10-26 12:00:00 GMT (after fall back)
+    # Range crosses the point where clocks go back at 02:00 BST -> 01:00 GMT
+    input: { start: 1792843200, end: 1793016000, timezone: "Europe/London" }
+    output: "October 24–26, 2026"
+
+  - name: "same range different timezone shows DST effect"
+    # Same Unix timestamps but in America/New_York instead of Europe/London
+    # start: 1774699200 = 2026-03-28 12:00:00 GMT = 2026-03-28 07:00:00 EST
+    # end: 1774872000 = 2026-03-30 12:00:00 GMT = 2026-03-30 08:00:00 EDT (US DST starts Mar 8)
+    input: { start: 1774699200, end: 1774872000, timezone: "America/New_York" }
+    output: "March 28–30, 2026"
