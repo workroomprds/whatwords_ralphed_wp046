@@ -65,3 +65,32 @@ The trade-off is initial effort, but since tests are generated once and rarely c
 **Rationale**: Python convention is to use `ValueError` when a function receives an argument of correct type but inappropriate value. This is idiomatic and expected by Python developers. More specific exceptions (like custom `InvalidTimestamp` or `ParseError` classes) would add complexity without clear benefit for a small library.
 
 **Consistency**: All five functions use the same error type, simplifying error handling for library users.
+
+## Timezone and DST Support (2026-01-29)
+
+### Delegating DST Complexity to `zoneinfo`
+**Decision**: Rely entirely on Python's `zoneinfo` module for DST handling, with no custom DST logic in whenwords.
+
+**Rationale**: DST rules are complex, vary by location, and change over time. Rather than implementing custom DST logic, we delegate to Python's standard library `zoneinfo`, which:
+- Maintains the IANA timezone database with all historical and current DST rules
+- Automatically handles offset changes during transitions
+- Updates with OS timezone data, staying current with rule changes
+- Has been thoroughly tested across many Python applications
+
+**Validation**: Added 9 comprehensive DST test cases covering:
+- UK spring forward (clocks jump 01:00 → 02:00 on 2026-03-29)
+- UK fall back (clocks go back 02:00 → 01:00 on 2026-10-25)
+- US Eastern time transitions (different dates than UK)
+- Date ranges spanning DST transitions
+
+All tests pass without any DST-specific code in whenwords. The implementation simply passes timezone names to `ZoneInfo()` and lets Python handle the rest.
+
+**Trade-offs**:
+- Requires Python 3.9+ (when `zoneinfo` was added to standard library)
+- Depends on system timezone database being up-to-date
+- Cannot customize DST behavior for edge cases
+
+**Alternative considered**: Implementing custom DST logic or using third-party libraries like `pytz`. Rejected because:
+- Custom logic would be error-prone and require extensive maintenance
+- Standard library is sufficient and has no external dependencies
+- `pytz` is deprecated in favor of `zoneinfo` for Python 3.9+
